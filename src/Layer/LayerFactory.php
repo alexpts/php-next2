@@ -6,16 +6,20 @@ namespace PTS\Next2\Layer;
 
 class LayerFactory implements LayerFactoryInterface
 {
+    protected Layer $layer;
 
-    public function create(callable|array $handler, array $options = [], ?string $path = null): Layer
+    /**
+     * @param callable[] $handlers
+     */
+    public function create(array $handlers, array $options = []): Layer
     {
-        $callable = is_array($handler) ? new GroupHandler($handler) : $handler;
-        $layer = new Layer($callable, $path);
+        $layer = new Layer($handlers);
 
         foreach ($options as $name => $value) {
-            if (property_exists($layer, $name)) {
-                $layer->{$name} = $value;
-            }
+            match ($name) {
+                'methods' => $layer->methods = explode('|', $value),
+                default => property_exists($layer, $name) && $layer->{$name} = $value,
+            };
         }
 
         return $layer;
@@ -23,15 +27,17 @@ class LayerFactory implements LayerFactoryInterface
 
     public function createFromConfig(array $config): Layer
     {
-        $handler = $this->getHandler($config);
-        return $this->create($handler, $config);
+        $handlers = $this->getHandler($config);
+        unset($config['handlers']);
+        return $this->create($handlers, $config);
     }
 
     /**
      * Any strategies for any cases via extend/overload this method
+     * @return callable[]
      */
-    protected function getHandler(array $params): callable
+    protected function getHandler(array $params): array
     {
-        return $params['handler'];
+        return $params['handlers'];
     }
 }

@@ -39,5 +39,9 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5"
+    },
+    "scripts": {
+        "bench": "vendor/bin/phpbench run --config=test/phpbench.json --report=aggregate",
+        "test": "vendor/bin/phpunit --config=test/phpunit.xml"
     }
 }

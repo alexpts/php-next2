@@ -12,33 +12,42 @@ use function in_array;
 
 class LayerRequestResolver implements LayerResolverInterface
 {
-
-    protected array $cache = [];
-
     public function makeRegExp(Layer $layer): ?string
     {
         $regexp = $layer->path;
-        $placeholders = [];
-
         if ($regexp === null) {
             return null;
         }
 
-        if (preg_match_all('~{(.*)}~Uu', $regexp, $placeholders)) {
-            $allowChars = '[^\/]+'; // any exclude \/
+        $placeholders = [];
+
+        if (preg_match_all('~{(?<name>.*)(:(?<restrict>.*))?}~Uu', $regexp, $placeholders)) {
             foreach ($placeholders[0] as $i => $match) {
-                $name = $placeholders[1][$i];
-                $replace = array_key_exists($name, $layer->restrictions) ? $layer->restrictions[$name] : $allowChars;
+                $name = $placeholders['name'][$i];
+                $replace = $this->getRestrict($placeholders['restrict'][$i], $layer->restrictions[$name] ?? null);
                 $replace = '(?<' . $name . '>' . $replace . ')';
                 $regexp = str_replace($match, $replace, $regexp);
             }
         }
 
-        return $regexp;
+        return '~^' . $regexp . '$~Uiu';
     }
 
-    public function forRequest(Layer $layer, RequestInterface $request, bool $checkMethod = true): ?Layer
+    /**
+     * Config restrict has more priorite that inline
+     */
+    protected function getRestrict(string $inlineRestrict, ?string $configRestrict): string
     {
+        $restrict = $configRestrict ?? $inlineRestrict;
+        return $restrict ?: '[^\/]+';
+    }
+
+    public function forRequest(
+        Layer $layer,
+        RequestInterface $request,
+        bool $checkMethod = true,
+        array &$uriParams = []
+    ): ?Layer {
         if ($checkMethod && !$this->filterIsAllowMethod($layer, $request)) {
             return null;
         }
@@ -47,7 +56,7 @@ class LayerRequestResolver implements LayerResolverInterface
             return $layer;
         }
 
-        return $this->matchRegexpLayer($layer, $request);
+        return $this->matchRegexpLayer($layer, $request, $uriParams);
     }
 
     protected function filterIsAllowMethod(Layer $layer, RequestInterface $request): bool
@@ -55,17 +64,16 @@ class LayerRequestResolver implements LayerResolverInterface
         return !count($layer->methods) || in_array($request->getMethod(), $layer->methods, true);
     }
 
-    protected function matchRegexpLayer(Layer $layer, RequestInterface $request): ?Layer
+    protected function matchRegexpLayer(Layer $layer, RequestInterface $request, array &$matches): ?Layer
     {
         $uri = $request->getUri()->getPath();
-        $regexp = $layer->regexp;
 
         // @todo reuse by cache key $uri::$regexp
-        if (preg_match('~^' . $regexp . '$~Uiu', $uri, $values)) {
+        if (preg_match($layer->regexp, $uri, $values)) {
             $filterValues = array_filter(array_keys($values), '\is_string');
             $matches = array_intersect_key($values, array_flip($filterValues));
 
-            return count($matches) ? $layer->setUriParams($matches) : $layer;
+            return $layer;
         }
 
         return null;

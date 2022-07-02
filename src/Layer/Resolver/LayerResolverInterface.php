@@ -11,5 +11,10 @@ interface LayerResolverInterface
 {
     public function makeRegExp(Layer $layer): ?string;
 
-    public function forRequest(Layer $layer, RequestInterface $request, bool $checkMethod = true): ?Layer;
+    public function forRequest(
+        Layer $layer,
+        RequestInterface $request,
+        bool $checkMethod = true,
+        array &$uriParams = []
+    ): ?Layer;
 }

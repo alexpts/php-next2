@@ -14,10 +14,9 @@ class Normalizer implements NormalizerInterface
     ) {
     }
 
-    public function normalizeLayer(Layer $layer): Layer
+    public function normalizeLayer(Layer $layer): void
     {
         $layer->name = $layer->name ?: 'l-' . $this->increment++;
         $layer->regexp = $this->resolver->makeRegExp($layer);
-        return $layer;
     }
 }

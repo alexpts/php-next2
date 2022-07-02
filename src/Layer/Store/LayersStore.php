@@ -48,18 +48,21 @@ class LayersStore
 
     public function addLayer(Layer $layer): static
     {
-        $this->layers[] = $this->normalizer->normalizeLayer($layer);
+        $this->normalizer->normalizeLayer($layer);
+        $this->layers[] = $layer;
         $this->sorted = false;
 
         return $this;
     }
 
     /**
-     * @param callable[] | callable $handler
+     * @param callable[] $handlers
      */
-    public function use(callable|array $handler, array $options = []): static
+    public function use(array|callable $handlers, array $options = []): static
     {
-        $layer = $this->layerFactory->create($handler, $options);
+        $handlers = is_array($handlers) ? $handlers : [$handlers];
+
+        $layer = $this->layerFactory->create($handlers, $options);
         return $this->addLayer($layer);
     }
 

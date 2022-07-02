@@ -33,18 +33,18 @@ class MicroAppTest extends TestCase
         static::assertSame('{"message":"ok"}', (string)$psr7Resp->getBody());
     }
 
-    public function testArrayHandlers(): void
+    public function testMultiHandlers(): void
     {
         $psr7Request = new ServerRequest('GET', new Uri('/'));
 
         $groupHandlers = [
-            function(ContextInterface $ctx, callable $next) {
-                $next();
+            function(ContextInterface $ctx) {
+                $ctx->next();
                 $ctx->a1 = 1;
             },
-            function(ContextInterface $ctx, callable $next) {
+            function(ContextInterface $ctx) {
                 $ctx->a2 = 1;
-                $next();
+                $ctx->next();
                 $ctx->response = new JsonResponse(['message' => 'ok']);
             },
         ];
@@ -63,9 +63,9 @@ class MicroAppTest extends TestCase
         $psr7Request = new ServerRequest('GET', new Uri('/'));
 
         $this->app->store
-            ->get('/', function(ContextInterface $ctx, callable $next) {
+            ->get('/', function(ContextInterface $ctx) {
                 static::assertSame('l-0', $ctx->getCurrentLayer()->name);
-                $next();
+                $ctx->next();
             })
             ->get('/', function(ContextInterface $ctx) {
                 static::assertSame('l-1', $ctx->getCurrentLayer()->name);

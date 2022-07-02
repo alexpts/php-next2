@@ -32,7 +32,8 @@ $psr7Request = new ServerRequest('GET', new Uri('/'));
 $app = new MicroApp;
 
 $app->store->get('/', function(ContextInterface $ctx) {
-    $ctx->response = new JsonResponse(['message' => 'Hello World!']);
+    $response = new JsonResponse(['message' => 'Hello World!']);
+    $ctx->setResponse($response);
 });
 
 $psr7Response = $app->handle($psr7Request); // psr-15 runner
