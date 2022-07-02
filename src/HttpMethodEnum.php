@@ -16,4 +16,5 @@ enum HttpMethodEnum
     case PATCH;
     case DELETE;
     case OPTIONS;
+    case CONNECT;
 }

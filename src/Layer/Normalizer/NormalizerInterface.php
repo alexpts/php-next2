@@ -6,5 +6,5 @@ use PTS\Next2\Layer\Layer;
 
 interface NormalizerInterface
 {
-    public function normalizeLayer(Layer $layer): Layer;
+    public function normalizeLayer(Layer $layer): void;
 }

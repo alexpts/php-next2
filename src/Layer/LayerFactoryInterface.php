@@ -4,10 +4,11 @@ namespace PTS\Next2\Layer;
 
 interface LayerFactoryInterface
 {
+
     /**
-     * @param callable|callable[] $handler
+     * @param callable[] $handlers
      */
-    public function create(callable|array $handler, array $options = []): Layer;
+    public function create(array $handlers, array $options = []): Layer;
 
     public function createFromConfig(array $config): Layer;
 }

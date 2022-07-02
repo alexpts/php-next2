@@ -11,8 +11,9 @@ class LayerFactoryTest extends TestCase
     public function testCreate(): void
     {
         $factory = new LayerFactory;
-        $layer = $factory->create(static function($ctx, callable $next): void {
-        });
+        $layer = $factory->create([
+            static function($ctx, callable $next): void {}
+        ]);
 
         static::assertSame(50, $layer->priority);
         static::assertNull($layer->path);
@@ -31,8 +32,7 @@ class LayerFactoryTest extends TestCase
                 'id' => '\d+',
             ],
             'priority' => 250,
-            'handler' => function() {
-            },
+            'handlers' => [ function() { } ],
         ];
 
         $layer = $factory->createFromConfig($config);

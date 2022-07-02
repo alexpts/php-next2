@@ -3,8 +3,6 @@
 namespace PTS\Next2\Test\unit\Layer\Store;
 
 use PHPUnit\Framework\TestCase;
-use PTS\Next2\Layer\LayerFactoryInterface;
-use PTS\Next2\Layer\Resolver\LayerResolverInterface;
 use PTS\Next2\Layer\Store\LayersStore;
 use PTS\Next2\MicroApp;
 use PTS\Psr7\Response\JsonResponse;

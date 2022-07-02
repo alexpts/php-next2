@@ -12,17 +12,14 @@ use function in_array;
 
 class LayerRequestResolver implements LayerResolverInterface
 {
-
-    protected array $cache = [];
-
     public function makeRegExp(Layer $layer): ?string
     {
         $regexp = $layer->path;
-        $placeholders = [];
-
         if ($regexp === null) {
             return null;
         }
+
+        $placeholders = [];
 
         if (preg_match_all('~{(.*)}~Uu', $regexp, $placeholders)) {
             $allowChars = '[^\/]+'; // any exclude \/
@@ -37,8 +34,12 @@ class LayerRequestResolver implements LayerResolverInterface
         return $regexp;
     }
 
-    public function forRequest(Layer $layer, RequestInterface $request, bool $checkMethod = true): ?Layer
-    {
+    public function forRequest(
+        Layer $layer,
+        RequestInterface $request,
+        bool $checkMethod = true,
+        array &$uriParams = []
+    ): ?Layer {
         if ($checkMethod && !$this->filterIsAllowMethod($layer, $request)) {
             return null;
         }
@@ -47,7 +48,7 @@ class LayerRequestResolver implements LayerResolverInterface
             return $layer;
         }
 
-        return $this->matchRegexpLayer($layer, $request);
+        return $this->matchRegexpLayer($layer, $request, $uriParams);
     }
 
     protected function filterIsAllowMethod(Layer $layer, RequestInterface $request): bool
@@ -55,7 +56,7 @@ class LayerRequestResolver implements LayerResolverInterface
         return !count($layer->methods) || in_array($request->getMethod(), $layer->methods, true);
     }
 
-    protected function matchRegexpLayer(Layer $layer, RequestInterface $request): ?Layer
+    protected function matchRegexpLayer(Layer $layer, RequestInterface $request, array &$matches): ?Layer
     {
         $uri = $request->getUri()->getPath();
         $regexp = $layer->regexp;
@@ -65,7 +66,7 @@ class LayerRequestResolver implements LayerResolverInterface
             $filterValues = array_filter(array_keys($values), '\is_string');
             $matches = array_intersect_key($values, array_flip($filterValues));
 
-            return count($matches) ? $layer->setUriParams($matches) : $layer;
+            return $layer;
         }
 
         return null;

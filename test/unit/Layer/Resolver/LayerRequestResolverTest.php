@@ -17,7 +17,8 @@ class LayerRequestResolverTest extends TestCase
      */
     public function testRegExp(string $path, string $expected, array $restrictions = []): void
     {
-        $layer = new Layer(fn() => 0, $path);
+        $layer = new Layer([ fn() => 0 ]);
+        $layer->path = $path;
         $layer->restrictions = $restrictions;
 
         $resolver = new LayerRequestResolver;
@@ -71,38 +72,56 @@ class LayerRequestResolverTest extends TestCase
         $layer = $factory->createFromConfig($layerConfig);
         $layer->regexp = $resolver->makeRegExp($layer);
 
-        $layer = $resolver->forRequest($layer, $request, $checkHttpMethod);
+        $match = [];
+        $layer = $resolver->forRequest($layer, $request, $checkHttpMethod, $match);
 
         static::assertNotNull($layer);
-        static::assertSame($expectMatches, $layer->uriParams);
+        static::assertSame($expectMatches, $match);
     }
 
     public function positiveMatchDataProvider(): array
     {
         return [
             'without path (middleware for any request)' => [
-                ['handler' => fn() => 0],
+                [
+                    'handlers' => [ fn() => 0 ]
+                ],
                 new ServerRequest('GET', new Uri('/users/')),
                 []
             ],
             'without method' => [
-                ['path' => '/users/', 'handler' => fn() => 0],
+                [
+                    'path' => '/users/',
+                    'handlers' => [ fn() => 0 ]
+                ],
                 new ServerRequest('GET', new Uri('/users/')),
                 []
             ],
             'with method' => [
-                ['path' => '/users/', 'method' => 'GET', 'handler' => fn() => 0],
+                [
+                    'path' => '/users/',
+                    'method' => 'GET',
+                    'handlers' => [ fn() => 0 ]
+                ],
                 new ServerRequest('GET', new Uri('/users/')),
                 []
             ],
             'skip check method' => [
-                ['path' => '/users/', 'methods' => ['GET'], 'handler' => fn() => 0],
+                [
+                    'path' => '/users/',
+                    'methods' => ['GET'],
+                    'handlers' => [ fn() => 0]
+                ],
                 new ServerRequest('POST', new Uri('/users/')),
                 [],
                 false
             ],
             'match param' => [
-                ['path' => '/users/{id}/', 'methods' => ['GET'], 'handler' => fn() => 0],
+                [
+                    'path' => '/users/{id}/',
+                    'methods' => ['GET'],
+                    'handlers' => [ fn() => 0 ]
+                ],
                 new ServerRequest('GET', new Uri('/users/34/')),
                 ['id' => '34']
             ],
@@ -110,7 +129,7 @@ class LayerRequestResolverTest extends TestCase
                 [
                     'path' => '/users/{id}/',
                     'methods' => ['GET'],
-                    'handler' => fn() => 0,
+                    'handlers' => [ fn() => 0 ],
                     'restrictions' => ['id' => '\d+']
                 ],
                 new ServerRequest('GET', new Uri('/users/34/')),
@@ -134,7 +153,7 @@ class LayerRequestResolverTest extends TestCase
         $layer = $factory->createFromConfig($layerConfig);
         $layer->regexp = $resolver->makeRegExp($layer);
 
-        $layer = $resolver->forRequest($layer, $request, $checkHttpMethod);
+        [$layer] = $resolver->forRequest($layer, $request, $checkHttpMethod);
         static::assertNull($layer);
     }
 
@@ -142,20 +161,27 @@ class LayerRequestResolverTest extends TestCase
     {
         return [
             'any path' => [
-                ['path' => '/users/', 'handler' => fn() => 0],
+                [
+                    'path' => '/users/',
+                    'handlers' => [ fn() => 0 ]
+                ],
                 new ServerRequest('GET', new Uri('/')),
             ],
             'match param + not pass restrictions ' => [
                 [
                     'path' => '/users/{id}/',
                     'methods' => ['GET'],
-                    'handler' => fn() => 0,
+                    'handlers' => [ fn() => 0 ],
                     'restrictions' => ['id' => '\d+']
                 ],
                 new ServerRequest('GET', new Uri('/users/alex/')),
             ],
             'any method' => [
-                ['path' => '/users/', 'methods' => ['GET'], 'handler' => fn() => 0],
+                [
+                    'path' => '/users/',
+                    'methods' => ['GET'],
+                    'handlers' => [ fn() => 0 ]
+                ],
                 new ServerRequest('POST', new Uri('/users/')),
             ],
         ];

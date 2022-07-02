@@ -12,8 +12,17 @@ interface ContextInterface
     public function getRequest(): ServerRequestInterface;
 
     public function getResponse(): ResponseInterface;
+    public function setResponse(ResponseInterface $response): static;
 
     public function getCurrentLayer(): Layer;
 
-    public function setCurrentLayer(Layer $layer): void;
+    /**
+     * @return array<string, string>
+     */
+    public function getUriParams(): array;
+
+    /**
+     * Delegate request to next Layer
+     */
+    public function next(): void;
 }
