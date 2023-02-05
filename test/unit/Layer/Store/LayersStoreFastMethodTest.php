@@ -39,7 +39,7 @@ class LayersStoreFastMethodTest extends TestCase
         static::assertSame($expected, (string)$response->getBody());
     }
 
-    public function fastMethodDataProvider(): array
+    public static function fastMethodDataProvider(): array
     {
         return [
             ['GET', '{"m":"GET"}'],

@@ -38,7 +38,7 @@ class LayerRequestResolverTest extends TestCase
         static::assertSame($expected, $regexp);
     }
 
-    public function regExpDataProvider(): array
+    public static function regExpDataProvider(): array
     {
         return [
             'no params' => [
@@ -91,7 +91,7 @@ class LayerRequestResolverTest extends TestCase
         static::assertSame($expectMatches, $match);
     }
 
-    public function positiveMatchDataProvider(): array
+    public static function positiveMatchDataProvider(): array
     {
         return [
             'without path (middleware for any request)' => [
@@ -169,7 +169,7 @@ class LayerRequestResolverTest extends TestCase
         static::assertNull($layer);
     }
 
-    public function negativeMatchDataProvider(): array
+    public static function negativeMatchDataProvider(): array
     {
         return [
             'any path' => [

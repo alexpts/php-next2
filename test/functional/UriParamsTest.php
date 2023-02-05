@@ -58,7 +58,7 @@ class UriParamsTest extends TestCase
         static::assertSame($expected, $ctx->getUriParams());
     }
 
-    public function regExpPositiveDataProvider(): array
+    public static function regExpPositiveDataProvider(): array
     {
         return [
             'param' => [
@@ -103,7 +103,7 @@ class UriParamsTest extends TestCase
         $this->app->handle($psr7Request);
     }
 
-    public function regExpNegativeDataProvider(): array
+    public static function regExpNegativeDataProvider(): array
     {
         return [
             'only number + first number not 0' => [
