@@ -1,3 +1,4 @@
+# https://docs.github.com/en/actions/learn-github-actions/understanding-github-actions
 name: phpunit
 
 on:
@@ -11,20 +12,24 @@ jobs:
     name: unit tests
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        php-versions: [ 8.1, 8.2 ]
+
     steps:
       - uses: actions/checkout@v3
       - uses: php-actions/composer@v6
-        with:
-          version: 2
 
-      - name: phpunit tests
+      - name: phpunit tests ${{ matrix.php-versions }}
         uses: php-actions/phpunit@v3
         with:
-          configuration: ./test/phpunit.xml
+          configuration: test/phpunit.xml
           php_extensions: pcov
+          php_version: ${{ matrix.php-versions }}
+          version: 10.0
 
       - name: coverage monitor
-        uses: slavcodev/coverage-monitor-action@1.6.0
+        uses: slavcodev/coverage-monitor-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           coverage_path: test/clover.xml
@@ -36,4 +41,4 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: test/clover.xml
           name: github-ci
-          verbose: true
+          #verbose: true
